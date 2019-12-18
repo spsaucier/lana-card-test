@@ -19,7 +19,7 @@ const Dashboard = ({orders, items, recipes}) => {
                     <div className="order" key={`order-${order.id || i}`}>
                         <div className={`order-number ${order.cancelled ? 'cancelled' : ''}`}>{order.id || i}</div>
                         <div className="order-recipe">{recipeName(order.recipe)}</div>
-                        { order.id && <div className="order-actions"><button onClick={order.cancel}>&times;</button></div> }
+                        { order.id && <div className="order-actions"><button onClick={order.cancel} title="Cancel Order">&times;</button></div> }
                     </div>
                 ))}
             </div>
