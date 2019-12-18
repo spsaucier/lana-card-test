@@ -11,3 +11,74 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
 }
+
+.status-bar {
+  display: flex;
+  padding: 1em;
+  justify-content: center;
+  border-bottom: 1px dotted #555;
+}
+.status-bar__status {
+  padding: 1em;
+}
+
+.dashboard {
+  padding: 1em;
+}
+@media (min-width: 768px) {
+  .dashboard {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-gap: 2em;
+  }
+}
+.dashboard__orders {
+  grid-column: 1;
+}
+.dashboard__items {
+  grid-column: 2;
+}
+
+.order,
+.item {
+  border-top: 1px solid #ddd;
+  padding: 1em;
+  display: grid;
+}
+.item {
+  grid-template-columns: 1fr 1fr 1fr 1fr;
+}
+.order {
+  grid-template-columns: 1fr 1fr 1fr;
+}
+.cancelled {
+  color: red;
+}
+.order button {
+  font-size: 18px;
+  padding: 0.1em 0.3em 0.2em;
+  line-height: 1;
+  background: transparent;
+  border: 1px solid #333;
+  margin: 0;
+}
+.legend {
+  opacity: 0.4;
+  font-style: italic;
+}
+
+.item-color-filter {
+  float: right;
+  padding: 0.3em;
+  font-size: 16px;
+  width: 100px;
+  margin: 0.8em 0 0;
+}
+
+.new-order {
+  margin-top: 10vh;
+}
+select {
+  font-size: 16px;
+  margin-left: 2em;
+}
