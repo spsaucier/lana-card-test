@@ -45,7 +45,7 @@ Functional plan:
   - in progress
   - fulfilled
 
-**New Order** modal
+**New Order** form
 
 - Order consists of a number of recipes
 - Each recipe consists of a number of items
