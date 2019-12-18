@@ -2,28 +2,28 @@ import React, {useEffect, useState} from 'react';
 import './App.css';
 import StatusBar from './components/StatusBar';
 import Dashboard from './components/Dashboard';
-import NewOrderModal from './components/NewOrderModal';
+import NewOrderForm from './components/NewOrderForm';
 
 interface Item {
-  name: String,
-  qty: String,
-  colors: Array<String>,
-  id: Number,
+  name: string,
+  qty: string,
+  colors: Array<string>,
+  id: number,
 };
 interface Order {
-  recipe: Number,
+  recipe: number,
   pending?: boolean,
   cancelled?: boolean,
-  id?: Number,
+  id?: number,
   cancel?: any
 }
 interface Recipe {
-  id: Number,
-  name: String,
+  id: number,
+  name: string,
   items: {
-    id: Number,
-    quntity: Number, //sic
-  },
+    id: number,
+    quntity: number, //sic
+  }[],
 }
 
 async function saveOrder(order: Order) {
@@ -54,53 +54,81 @@ const App: React.FC = () => {
 
   const cancelOrder = (id: Number, order: Order) => {
     window.clearTimeout(ordersPending[id.toString()]);
-    delete order.cancel;
-    delete order.id;
-    delete order.pending;
-    setOrders([...orders, {...order, cancelled: true }]);
+    setOrders(orders => orders.map(currentOrder => {
+      if (currentOrder.id === order.id) {
+        return {
+          recipe: order.recipe,
+          pending: order.pending,
+          cancelled: true,
+        };
+      }
+      return currentOrder;
+    }));
+
+    setItems(newItems => {
+      const matchingRecipes = recipes.filter(recipe => recipe.id === order.recipe);
+      matchingRecipes[0].items.forEach((recipeItem: { id: number; quntity: number; }) => {
+        const itemIndex = newItems.findIndex(item => item.id === recipeItem.id);
+        newItems[itemIndex].qty = (parseInt(newItems[itemIndex].qty) + recipeItem.quntity).toString();
+      });
+      return newItems;
+    });
   }
 
-  const createOrder = (e: { target: { value: string; }; }) => {
+  const createOrder = (recipeIdString: string) => {
+    const recipeId = parseInt(recipeIdString);
     let newOrder: Order = {
       id: nextOrderId,
-      recipe: parseInt(e.target.value, 10),
+      recipe: recipeId,
       pending: true,
     }
     newOrder.cancel = () => cancelOrder(nextOrderId, newOrder);
     setOrders([...orders, newOrder]);
-    setNextOrderId(nextOrderId + 1);
+    setNextOrderId(nextOrderId => nextOrderId + 1);
+
+    // Remove used items
+    const matchingRecipes = recipes.filter(recipe => recipe.id === recipeId);
+    const remainingItems = items;
+    matchingRecipes[0].items.forEach((recipeItem: { id: number; quntity: number; }) => {
+      const itemIndex = remainingItems.findIndex(item => item.id === recipeItem.id);
+      remainingItems[itemIndex].qty = (parseInt(remainingItems[itemIndex].qty) - recipeItem.quntity).toString();
+    });
+    setItems(remainingItems);
+
     ordersPending[nextOrderId.toString()] = window.setTimeout(() => {
       saveOrder(formatOrderForApi({...newOrder}))
-      .then(() => setOrders([
-        ...orders,
-        {
-          recipe: newOrder.recipe,
-          pending: newOrder.pending,
+      .then(() => setOrders(orders => orders.map(order => {
+        if (order.id === newOrder.id) {
+          return {
+            recipe: newOrder.recipe,
+            pending: newOrder.pending,
+          }
         }
-      ]));
+        return order;
+      })));
     }, 180000); // 3 minutes to cancel. Will not save if page is not still up at that point, so preferably, handle this on the backend.
   }
 
   useEffect(() => {
     async function getItems() {
-      const items = await fetch('https://demo5544737.mockable.io/items')
+      const remoteItems = await fetch('https://demo5544737.mockable.io/items')
         .then(r => r.json())
         .then(r => r.itens); //sic
-      setItems(items);
+      setItems(remoteItems);
     }
     getItems();
     async function getRecipes() {
-      const recipes = await fetch('https://demo5544737.mockable.io/recipes')
+      const remoteRecipes = await fetch('https://demo5544737.mockable.io/recipes')
         .then(r => r.json())
         .then(r => r.recipes);
-      setRecipes(recipes);
+      setRecipes(remoteRecipes);
     }
     getRecipes();
     async function getOrders() {
-      const orders = await fetch('https://demo5544737.mockable.io/orders')
+      const remoteOrders = await fetch('https://demo5544737.mockable.io/orders')
         .then(r => r.json())
         .then(r => r.orders);
-      setOrders(orders);
+      setOrders(remoteOrders);
     }
     getOrders();
     return () => {};
@@ -109,7 +137,7 @@ const App: React.FC = () => {
     <div className="App">
       <StatusBar orders={orders} />
       <Dashboard orders={orders} items={items} recipes={[...recipes]} />
-      <NewOrderModal items={items} recipes={recipes} createOrder={createOrder} />
+      <NewOrderForm items={items} recipes={recipes} createOrder={createOrder} />
     </div>
   );
 }
