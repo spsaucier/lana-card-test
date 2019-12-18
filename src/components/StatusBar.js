@@ -8,10 +8,13 @@ const StatusBar = ({orders}) => {
         "Fulfilled": 0,
     };
     orders.forEach(order => {
-        if (order.pending) orderTypeCounts.Pending = orderTypeCounts.Pending + 1;
-        if (order.cancelled) orderTypeCounts.Cancelled = orderTypeCounts.Cancelled + 1; //TODO: unknown if this is correct
-        if (order.in_progress) orderTypeCounts['In Progress'] = orderTypeCounts['In Progress'] + 1; //TODO: unknown if this is correct
-        if (order.fulfilled) orderTypeCounts.Fulfilled = orderTypeCounts.Fulfilled + 1; //TODO: unknown if this is correct
+        if (order.cancelled) {
+            orderTypeCounts.Cancelled = orderTypeCounts.Cancelled + 1;
+        } else {
+            if (order.pending) orderTypeCounts.Pending = orderTypeCounts.Pending + 1;
+            if (order.in_progress) orderTypeCounts['In Progress'] = orderTypeCounts['In Progress'] + 1; //TODO: unknown if this is correct
+            if (order.fulfilled) orderTypeCounts.Fulfilled = orderTypeCounts.Fulfilled + 1; //TODO: unknown if this is correct
+        }
     });
     return (
         <div className="status-bar">{
